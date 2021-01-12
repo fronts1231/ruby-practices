@@ -1,8 +1,8 @@
 numbers = []
-x = 0
-while x < 100
-  x += 1
-  numbers.push(x)
+a = 0
+while a < 100
+  a += 1
+  numbers.push(a)
 end
 
 numbers.each do |x|
