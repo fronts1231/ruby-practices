@@ -1,0 +1,11 @@
+CC = "gcc"
+
+task :default => "zukei301"
+
+file "zukei301" => "zukei301.o" do
+  sh "#{CC} -o zukei301 zukei301.o"
+end
+
+file "zukei301.o" => "zukei301.c" do
+  sh "#{CC} -c zukei301.c"
+end
