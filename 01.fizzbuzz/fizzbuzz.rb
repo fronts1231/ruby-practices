@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 numbers = []
 a = 0
 while a < 100
@@ -6,18 +8,13 @@ while a < 100
 end
 
 numbers.each do |x|
-  if x % 5 == 0 && x % 3 == 0
-    puts "fizzbuzz"
+  if (x % 5).zero? && (x % 3).zero?
+    puts 'fizzbuzz'
+  elsif (x % 5).zero?
+    puts 'buzz'
+  elsif (x % 3).zero?
+    puts 'fizz'
   else
-    if x % 5 == 0
-      puts "buzz"
-    else
-      if x % 3 == 0
-        puts "fizz"
-      else
-        puts x
-      end
-    end
+    puts x
   end
 end
-
