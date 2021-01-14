@@ -1,34 +1,50 @@
-def bowling(score)
-  # score = ARGV[0].to_s
+# frozen_string_literal: true
+
+def bowling(result)
+  score = result.to_s
   scores = score.chars
   shots = []
   scores.each do |s|
-    if s == 'X'
-      shots << 10
-      shots << 0
-    else
-      shots << s.to_i
-    end
+    shots << if s != 'X'
+               s.to_i
+             else
+               10
+             end
   end
+  bowling1(shots)
+end
 
+def bowling1(shots)
+  shots.each_with_index do |shot, i|
+    shots.insert(i + 1, 0) if shot == 10 && i.even?
+  end
+  bowling2(shots)
+end
+
+def bowling2(shots)
   frames = []
-  shots.each_slice(2) do |s|
-    frames << s
+  shots.each_slice(2) do |shot|
+    frames << shot
   end
+  @shots = shots
+  bowling3(frames)
+end
 
+def bowling3(frames)
   point = 0
-  frames.each_with_index do |f, i|
+  frames.each_with_index do |frame, i|
     number = i * 2
-    if f[0] == 10
-      point += shots[number..(number + 3)].sum
-    elsif f.sum == 10 && i != 9
-      point += shots[number..(number + 2)].sum
-    else
-      point += f.sum
-    end
+    point += if frame.sum != 10 || i >= 9
+               @shots[number..(number + 1)].sum
+             elsif frame[0] == 10 && frames[i + 1] == [10, 0]
+               @shots[number..(number + 4)].sum
+             elsif frame[0] == 10
+               @shots[number..(number + 3)].sum
+             else
+               @shots[number..(number + 2)].sum
+             end
   end
-  p frames
   p point
 end
 
-# bowling(ARGV[0])
+bowling(ARGV[0])
