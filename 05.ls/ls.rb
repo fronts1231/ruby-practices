@@ -40,25 +40,14 @@ if option.has?(:reverse)
   files.reverse!
 end
 
-# files.each do |file|
-#   stat = File.stat(file)
-#   print "0%o" % stat.mode.to_s.rjust(8)
-#   print stat.nlink.to_s.rjust(2)
-#   print stat.uid.to_s.rjust(4)
-#   print stat.gid.to_s.rjust(3)
-#   print stat.size.to_s.rjust (6)
-#   print stat.ctime.strftime("%m").to_i.to_s.rjust(3)
-#   print stat.ctime.strftime("%d").to_i.to_s.rjust(3)
-#   print stat.ctime.strftime("%H:%M").rjust(6)
-#   print "\n"
-# end
+@file_type = if File.ftype(file)
 
 file_new = []
 files.each do |file|
-  files.reverse!
   stat = File.stat(file)
   file_new2 = []
   if option.has?(:long)
+    file_new2 << File.ftype(file).rjust(9)
     file_new2 << "0%o" % stat.mode.to_s.rjust(8)
     file_new2 << stat.nlink.to_s.rjust(2)
     file_new2 << stat.uid.to_s.rjust(4)
