@@ -17,19 +17,10 @@ class Option
   def has?(name)
     @options.include?(name)
   end
-
-  # def get(name)
-  #   @options[name]
-  # end
-
-  # def get_extras
-  #   ARGV
-  # end
 end
 
 @option = Option.new
-@files = Dir.entries(Dir.pwd)
-@files.sort!
+@files = Dir.entries(Dir.pwd).sort!
 
 unless @option.has?(:all)
   @files = @files.filter do |file|
@@ -37,14 +28,16 @@ unless @option.has?(:all)
   end
 end
 
-if @option.has?(:reverse)
-  @files.reverse!
+@files.reverse! if @option.has?(:reverse)
+
+def max_size(array)
+  array.map(&:size).max
 end
 
 def file_mode(file_name)
-  file_mode_output = sprintf("%06o", File.stat(file_name).mode)
-  file_types = {'01': 'p', '02': 'c', '04': 'd', '06': 'b', '10': '-', '12': 'l', '14': 's'}
-  file_permissions = {'0': '---', '1': '--x', '2': '-w-', '3': '-wx', '4': 'r--', '5': 'r-x', '6': 'rw-', '7': 'rwx'}
+  file_mode_output = format('%06o', File.stat(file_name).mode)
+  file_types = { '01': 'p', '02': 'c', '04': 'd', '06': 'b', '10': '-', '12': 'l', '14': 's' }
+  file_permissions = { '0': '---', '1': '--x', '2': '-w-', '3': '-wx', '4': 'r--', '5': 'r-x', '6': 'rw-', '7': 'rwx' }
   file_type = file_types[file_mode_output[0..1].to_sym]
   file_pemission_owner = file_permissions[file_mode_output[3].to_sym]
   file_pemission_group = file_permissions[file_mode_output[4].to_sym]
@@ -52,51 +45,39 @@ def file_mode(file_name)
   file_type + file_pemission_owner + file_pemission_group + file_pemission_others
 end
 
-def long_description
-  file_new = []
-  @files.each do |file|
-    stat = File.stat(file)
-    @block = 0
-    @block += stat.blocks
-    file_new2 = []
-      file_new2 << file_mode(file)
-      file_new2 << stat.nlink.to_s.rjust(3)
-      file_new2 << "\s" + Etc.getpwuid(stat.uid).name
-      file_new2 << "\s" * 2 + Etc.getgrgid(stat.gid).name
-      file_new2 << stat.size.to_s.rjust(6)
-      file_new2 << stat.ctime.strftime("%m").to_i.to_s.rjust(3)
-      file_new2 << stat.ctime.strftime("%d").to_i.to_s.rjust(3)
-      file_new2 << stat.ctime.strftime("%H:%M\s").rjust(7)
-      file_new2 << file
-    file_new << file_new2.join
-  end
-  puts 'total' + "\s" + @block.to_s
-  puts file_new
-end
+@blocks = @files.map { |file| File.stat(file).blocks }
+@permissions = @files.map { |file| file_mode(file) }
+@nlinks = @files.map { |file| File.stat(file).nlink.to_s }
+@user_names = @files.map { |file| Etc.getpwuid(File.stat(file).uid).name }
+@group_names = @files.map { |file| Etc.getgrgid(File.stat(file).gid).name }
+@sizes = @files.map { |file| File.stat(file).size.to_s }
+@months = @files.map { |file| File.stat(file).ctime.strftime('%m').to_i.to_s }
+@dates = @files.map { |file| File.stat(file).ctime.strftime('%d').to_i.to_s }
+@times = @files.map { |file| File.stat(file).ctime.strftime("%H:%M\s").to_s }
 
-size = @files.map do |file|
-  file.size
-end
-@max_size = size.max
+@file_long = [
+  @permissions.map { |permission| permission.ljust(max_size((@permissions)) + 1) },
+  @nlinks.map { |nlink| nlink.rjust(max_size((@nlinks)) + 1) },
+  @user_names.map { |user_name| "\s#{user_name.ljust(max_size((@user_names)) + 2)}" },
+  @group_names.map { |group_name| group_name.ljust(max_size((@group_names))) },
+  @sizes.map { |size| size.rjust(max_size((@sizes)) + 2) },
+  @months.map { |month| "\s#{month.rjust(max_size((@months)))}" },
+  @dates.map { |date| date.rjust(max_size((@dates)) + 1) },
+  @times.map { |time| time.rjust(max_size((@times)) + 1) },
+  @files
+]
 
-def short_description
-  file_short = []
-  files_with_indent = @files.map do |file|
-    file.ljust(@max_size + 5)
-  end
-  files_with_indent.each_slice((@files.size - 1) / 3 + 1) do |file|
-    file.fill(nil, (@files.size - 1) / 3 + 1, 0)
-    file_short << file
-  end
-  file_short_transposed = file_short.transpose
-  file_short_transposed.map! do |file|
-    file.join
-  end
-  puts file_short_transposed
+@file_short = []
+files_with_indent = @files.map do |file|
+  file.ljust(max_size(@files) + 5)
+end
+files_with_indent.each_slice((@files.size - 1) / 3 + 1) do |file|
+  @file_short << file.fill(nil, (@files.size - 1) / 3 + 1, 0)
 end
 
 if @option.has?(:long)
-  long_description
+  puts "total\s#{@blocks.sum}"
+  puts(@file_long.transpose.map(&:join))
 else
-  short_description
+  puts(@file_short.transpose.map(&:join))
 end
