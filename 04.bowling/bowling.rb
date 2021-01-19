@@ -11,26 +11,26 @@ def bowling(result)
                10
              end
   end
-  bowling1(shots)
+  fill_after_strike(shots)
 end
 
-def bowling1(shots)
+def fill_after_strike(shots)
   shots.each_with_index do |shot, i|
     shots.insert(i + 1, 0) if shot == 10 && i.even?
   end
-  bowling2(shots)
+  slice_by_frame(shots)
 end
 
-def bowling2(shots)
+def slice_by_frame(shots)
   frames = []
   shots.each_slice(2) do |shot|
     frames << shot
   end
   @shots = shots
-  bowling3(frames)
+  calculate_score(frames)
 end
 
-def bowling3(frames)
+def calculate_score(frames)
   point = 0
   frames.each_with_index do |frame, i|
     number = i * 2
