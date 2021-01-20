@@ -44,7 +44,7 @@ def calculate_score(frames)
                @shots[number..(number + 2)].sum
              end
   end
-  p point
+  point
 end
 
-bowling(ARGV[0])
+p bowling(ARGV[0])
